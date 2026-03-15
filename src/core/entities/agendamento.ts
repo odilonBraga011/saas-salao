@@ -10,10 +10,18 @@ export interface EntidadeAgendamento {
   idSalao: string;
   idCliente: string;
   idProfissional: string;
+  nomeCliente?: string;
+  nomeProfissional?: string;
   inicioEm: Date;
   fimEm: Date;
   status: StatusAgendamento;
   observacao?: string;
+  itens?: Array<{
+    idServico: string;
+    nomeServico?: string;
+    quantidade: number;
+    precoUnitarioCentavos: number;
+  }>;
 }
 
 export interface EntidadeHistoricoCliente {

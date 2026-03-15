@@ -8,12 +8,11 @@ const config: Config = {
         brand: {
           50: "#f3f6ff",
           500: "#5b73ff",
-          700: "#3647d6"
-        }
-      }
-    }
+          700: "#3647d6",
+        },
+      },
+    },
   },
-  plugins: []
 };
 
 export default config;

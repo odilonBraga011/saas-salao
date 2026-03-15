@@ -38,19 +38,43 @@ const montarPeriodo = (inicioDe?: Date, inicioAte?: Date): Prisma.DateTimeFilter
 
 export class RepositorioPrismaAgendamento implements RepositorioAgendamento {
   async criar(dados: Omit<EntidadeAgendamento, "id">): Promise<EntidadeAgendamento> {
-    const agendamento = await prisma.appointment.create({
-      data: {
-        tenantId: dados.idSalao,
-        clientId: dados.idCliente,
-        professionalId: dados.idProfissional,
-        startsAt: dados.inicioEm,
-        endsAt: dados.fimEm,
-        note: dados.observacao,
-        status: mapaStatusParaPrisma[dados.status]
-      }
-    });
+    return prisma.$transaction(async (trx) => {
+      const itens = await this.resolverItensAgendamento(
+        trx,
+        dados.idSalao,
+        dados.itens
+      );
 
-    return this.mapearParaEntidade(agendamento);
+      const agendamento = await trx.appointment.create({
+        data: {
+          tenantId: dados.idSalao,
+          clientId: dados.idCliente,
+          professionalId: dados.idProfissional,
+          startsAt: dados.inicioEm,
+          endsAt: dados.fimEm,
+          note: dados.observacao,
+          status: mapaStatusParaPrisma[dados.status],
+          items: itens.length > 0 ? { create: itens } : undefined
+        },
+        include: {
+          client: {
+            select: { fullName: true }
+          },
+          professional: {
+            select: { fullName: true }
+          },
+          items: {
+            include: {
+              service: {
+                select: { id: true, name: true }
+              }
+            }
+          }
+        }
+      });
+
+      return this.mapearParaEntidade(agendamento);
+    });
   }
 
   async listar(filtros: FiltrosListagemAgendamentos): Promise<EntidadeAgendamento[]> {
@@ -64,6 +88,21 @@ export class RepositorioPrismaAgendamento implements RepositorioAgendamento {
 
     const agendamentos = await prisma.appointment.findMany({
       where,
+      include: {
+        client: {
+          select: { fullName: true }
+        },
+        professional: {
+          select: { fullName: true }
+        },
+        items: {
+          include: {
+            service: {
+              select: { id: true, name: true }
+            }
+          }
+        }
+      },
       orderBy: { startsAt: "asc" }
     });
 
@@ -280,6 +319,49 @@ export class RepositorioPrismaAgendamento implements RepositorioAgendamento {
     };
   }
 
+  private async resolverItensAgendamento(
+    trx: Prisma.TransactionClient,
+    idSalao: string,
+    itens?: EntidadeAgendamento["itens"]
+  ): Promise<Array<{ serviceId: string; quantity: number; unitPriceCents: number }>> {
+    if (!itens || itens.length === 0) {
+      return [];
+    }
+
+    const idsServicos = [...new Set(itens.map((item) => item.idServico))];
+    const servicos = await trx.service.findMany({
+      where: {
+        tenantId: idSalao,
+        id: { in: idsServicos }
+      },
+      select: {
+        id: true,
+        name: true,
+        basePriceCents: true
+      }
+    });
+
+    if (servicos.length !== idsServicos.length) {
+      throw new Error("Um ou mais servicos informados nao pertencem ao salao.");
+    }
+
+    const mapaServicos = new Map(servicos.map((servico) => [servico.id, servico]));
+
+    return itens.map((item) => {
+      const servico = mapaServicos.get(item.idServico);
+
+      if (!servico) {
+        throw new Error("Servico informado nao encontrado.");
+      }
+
+      return {
+        serviceId: item.idServico,
+        quantity: item.quantidade,
+        unitPriceCents: item.precoUnitarioCentavos ?? servico.basePriceCents
+      };
+    });
+  }
+
   private mapearParaEntidade(agendamento: {
     id: string;
     tenantId: string;
@@ -289,16 +371,32 @@ export class RepositorioPrismaAgendamento implements RepositorioAgendamento {
     endsAt: Date;
     note: string | null;
     status: "SCHEDULED" | "CONFIRMED" | "COMPLETED" | "CANCELED" | "NO_SHOW";
+    client?: { fullName: string } | null;
+    professional?: { fullName: string } | null;
+    items?: Array<{
+      serviceId: string;
+      quantity: number;
+      unitPriceCents: number;
+      service: { id: string; name: string };
+    }>;
   }): EntidadeAgendamento {
     return {
       id: agendamento.id,
       idSalao: agendamento.tenantId,
       idCliente: agendamento.clientId,
       idProfissional: agendamento.professionalId,
+      nomeCliente: agendamento.client?.fullName,
+      nomeProfissional: agendamento.professional?.fullName,
       inicioEm: agendamento.startsAt,
       fimEm: agendamento.endsAt,
       observacao: agendamento.note ?? undefined,
-      status: mapaStatusDoPrisma[agendamento.status]
+      status: mapaStatusDoPrisma[agendamento.status],
+      itens: agendamento.items?.map((item) => ({
+        idServico: item.serviceId,
+        nomeServico: item.service.name,
+        quantidade: item.quantity,
+        precoUnitarioCentavos: item.unitPriceCents
+      }))
     };
   }
 }

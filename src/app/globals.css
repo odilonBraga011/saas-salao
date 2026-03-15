@@ -1,11 +1,31 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 :root {
-  color-scheme: light;
+  --background-cream: #f7f0e7;
+  --ink: #1f1b16;
+}
+
+html {
+  background: var(--background-cream);
 }
 
 body {
-  @apply bg-slate-50 text-slate-900 antialiased;
+  min-height: 100vh;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at top left, rgba(255, 221, 176, 0.78), transparent 30%),
+    radial-gradient(circle at right 15%, rgba(199, 232, 221, 0.62), transparent 32%),
+    linear-gradient(180deg, #fffdf8 0%, var(--background-cream) 50%, #f3ebdf 100%);
+  font-family: "Trebuchet MS", "Avenir Next", "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
 }

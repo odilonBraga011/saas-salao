@@ -4,21 +4,7 @@ import {
 } from "@/core/repositories/repositorio-inicializacao";
 import { prisma } from "@/infrastructure/db/prisma-client";
 
-const papeisIniciais = [
-  { key: "PROPRIETARIO", description: "Acesso total ao sistema" },
-  { key: "GERENTE", description: "Gestão operacional do salão" },
-  { key: "RECEPCAO", description: "Operação de agenda e clientes" },
-  { key: "PROFISSIONAL", description: "Acesso à própria agenda" }
-];
-
-const permissoesIniciais = [
-  { key: "agendamentos.gerenciar", description: "Gerenciar agendamentos" },
-  { key: "clientes.gerenciar", description: "Gerenciar clientes" },
-  { key: "servicos.gerenciar", description: "Gerenciar serviços" },
-  { key: "profissionais.gerenciar", description: "Gerenciar profissionais" },
-  { key: "usuarios.gerenciar", description: "Gerenciar usuários" },
-  { key: "painel.visualizar", description: "Visualizar painel gerencial" }
-];
+import initialSetup from "../../../prisma/initial-setup.json";
 
 export class RepositorioPrismaInicializacao implements RepositorioInicializacao {
   async sistemaJaInicializado(): Promise<boolean> {
@@ -35,7 +21,7 @@ export class RepositorioPrismaInicializacao implements RepositorioInicializacao 
         }
       });
 
-      for (const papel of papeisIniciais) {
+      for (const papel of initialSetup.roles) {
         await trx.role.upsert({
           where: { key: papel.key },
           create: papel,
@@ -43,12 +29,34 @@ export class RepositorioPrismaInicializacao implements RepositorioInicializacao 
         });
       }
 
-      for (const permissao of permissoesIniciais) {
+      for (const permissao of initialSetup.permissions) {
         await trx.permission.upsert({
           where: { key: permissao.key },
           create: permissao,
           update: { description: permissao.description }
         });
+      }
+
+      for (const [papelKey, permissoes] of Object.entries(initialSetup.rolePermissions)) {
+        const papel = await trx.role.findUniqueOrThrow({ where: { key: papelKey } });
+
+        for (const permissaoKey of permissoes) {
+          const permissao = await trx.permission.findUniqueOrThrow({ where: { key: permissaoKey } });
+
+          await trx.rolePermission.upsert({
+            where: {
+              roleId_permissionId: {
+                roleId: papel.id,
+                permissionId: permissao.id
+              }
+            },
+            update: {},
+            create: {
+              roleId: papel.id,
+              permissionId: permissao.id
+            }
+          });
+        }
       }
 
       const usuario = await trx.user.create({
@@ -70,10 +78,12 @@ export class RepositorioPrismaInicializacao implements RepositorioInicializacao 
       });
 
       await trx.socialChannelConfig.createMany({
-        data: [
-          { tenantId: tenant.id, channel: "WHATSAPP", webhookUrl: "https://definir-webhook", isActive: false },
-          { tenantId: tenant.id, channel: "INSTAGRAM", webhookUrl: "https://definir-webhook", isActive: false }
-        ]
+        data: initialSetup.socialChannels.map((canal) => ({
+          tenantId: tenant.id,
+          channel: canal.channel,
+          webhookUrl: canal.webhookUrl,
+          isActive: canal.isActive
+        }))
       });
     });
   }

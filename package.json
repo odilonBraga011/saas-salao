@@ -11,11 +11,14 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
+    "prisma:seed": "prisma db seed",
     "prod:start": "npm run prisma:deploy && npm run start"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "7.0.0",
     "@prisma/client": "7.0.0",
     "@radix-ui/react-slot": "^1.0.2",
+    "@tailwindcss/postcss": "^4.2.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.469.0",
@@ -24,6 +27,7 @@
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "tailwind-merge": "^2.6.0",
+    "tailwindcss": "^4.2.1",
     "zod": "^3.24.1"
   },
   "devDependencies": {
@@ -31,11 +35,11 @@
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
     "autoprefixer": "^10.4.20",
+    "dotenv": "^16.6.1",
     "eslint": "^9.16.0",
     "eslint-config-next": "15.1.0",
-    "postcss": "^8.4.49",
+    "postcss": "^8.5.8",
     "prisma": "7.0.0",
-    "tailwindcss": "7.0.0",
     "typescript": "^5.7.2"
   }
 }

@@ -1,0 +1,94 @@
+{
+  "tenant": {
+    "name": "Salao Exemplo",
+    "slug": "salao-exemplo"
+  },
+  "owner": {
+    "fullName": "Ana Souza",
+    "email": "ana@salao.com",
+    "password": "SenhaForte123"
+  },
+  "roles": [
+    {
+      "key": "PROPRIETARIO",
+      "description": "Acesso total ao sistema"
+    },
+    {
+      "key": "GERENTE",
+      "description": "Gestao operacional do salao"
+    },
+    {
+      "key": "RECEPCAO",
+      "description": "Operacao de agenda e clientes"
+    },
+    {
+      "key": "PROFISSIONAL",
+      "description": "Acesso a propria agenda"
+    }
+  ],
+  "permissions": [
+    {
+      "key": "agendamentos.gerenciar",
+      "description": "Gerenciar agendamentos"
+    },
+    {
+      "key": "clientes.gerenciar",
+      "description": "Gerenciar clientes"
+    },
+    {
+      "key": "servicos.gerenciar",
+      "description": "Gerenciar servicos"
+    },
+    {
+      "key": "profissionais.gerenciar",
+      "description": "Gerenciar profissionais"
+    },
+    {
+      "key": "usuarios.gerenciar",
+      "description": "Gerenciar usuarios"
+    },
+    {
+      "key": "painel.visualizar",
+      "description": "Visualizar painel gerencial"
+    },
+    {
+      "key": "agendamentos.visualizar.proprio",
+      "description": "Visualizar a propria agenda"
+    }
+  ],
+  "rolePermissions": {
+    "PROPRIETARIO": [
+      "agendamentos.gerenciar",
+      "servicos.gerenciar",
+      "profissionais.gerenciar",
+      "usuarios.gerenciar",
+      "painel.visualizar"
+    ],
+    "GERENTE": [
+      "agendamentos.gerenciar",
+      "servicos.gerenciar",
+      "profissionais.gerenciar",
+      "painel.visualizar"
+    ],
+    "RECEPCAO": [
+      "agendamentos.gerenciar",
+      "clientes.gerenciar",
+      "painel.visualizar"
+    ],
+    "PROFISSIONAL": [
+      "agendamentos.visualizar.proprio"
+    ]
+  },
+  "socialChannels": [
+    {
+      "channel": "WHATSAPP",
+      "webhookUrl": "https://definir-webhook",
+      "isActive": false
+    },
+    {
+      "channel": "INSTAGRAM",
+      "webhookUrl": "https://definir-webhook",
+      "isActive": false
+    }
+  ]
+}
