@@ -8,6 +8,7 @@ interface EntradaCriarAgendamento {
   inicioEm: Date;
   fimEm: Date;
   observacao?: string;
+  itens?: EntidadeAgendamento["itens"];
 }
 
 export class CasoDeUsoCriarAgendamento {

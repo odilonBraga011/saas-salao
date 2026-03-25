@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ dados: agendamento }, { status: 201 });
   } catch (erro) {
     const mensagem = erro instanceof Error ? erro.message : "Erro ao criar agendamento.";
-    const status = mensagem.includes("conflito") ? 409 : 422;
+    const status = /conflito|j[aá] possui agendamento/i.test(mensagem) ? 409 : 422;
 
     return NextResponse.json({ erro: mensagem }, { status });
   }

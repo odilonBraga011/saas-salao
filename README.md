@@ -15,6 +15,7 @@ Base inicial de um **SaaS para salao de beleza** com foco em:
 - Painel gerencial (faturamento, comparecimento, top servicos/profissionais)
 - Notificacoes sociais com log de envios
 - Controle de usuarios internos
+- Cadastros de clientes, profissionais e servicos
 - Inicializacao do sistema (tenant + proprietario)
 - Login com token de acesso assinado
 
@@ -128,10 +129,29 @@ O endpoint HTTP continua disponivel como alternativa:
 - `GET /api/agendamentos?idSalao=...&idProfissional=...&status=...`
 - `POST /api/agendamentos`
 - `POST /api/agendamentos/:idAgendamento/notificar`
+- `PATCH /api/agendamentos/:idAgendamento`
+- `GET /api/clientes?idSalao=...`
+- `POST /api/clientes`
+- `GET /api/profissionais?idSalao=...`
+- `POST /api/profissionais`
+- `GET /api/servicos?idSalao=...`
+- `POST /api/servicos`
 - `GET /api/clientes/:idCliente/historico?idSalao=...`
 - `GET /api/painel/resumo?idSalao=...&inicioDe=...&inicioAte=...`
 - `GET /api/usuarios?idSalao=...` (requer `x-papel-usuario` com permissao)
 - `POST /api/usuarios` (requer `x-papel-usuario` com permissao)
+
+Exemplo de criacao de usuario interno:
+
+```json
+{
+  "idSalao": "id-do-salao",
+  "nomeCompleto": "Julia Lima",
+  "email": "julia@salao.com",
+  "senha": "SenhaForte123",
+  "papel": "RECEPCAO"
+}
+```
 
 ## Subida em producao (minimo)
 

@@ -20,7 +20,7 @@ export interface EntidadeAgendamento {
     idServico: string;
     nomeServico?: string;
     quantidade: number;
-    precoUnitarioCentavos: number;
+    precoUnitarioCentavos?: number;
   }>;
 }
 

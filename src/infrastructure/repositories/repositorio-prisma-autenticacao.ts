@@ -2,6 +2,7 @@ import {
   RepositorioAutenticacao,
   UsuarioAutenticacao
 } from "@/core/repositories/repositorio-autenticacao";
+import { escolherPapelPrincipal } from "@/infrastructure/auth/papeis";
 import { prisma } from "@/infrastructure/db/prisma-client";
 
 export class RepositorioPrismaAutenticacao implements RepositorioAutenticacao {
@@ -27,13 +28,15 @@ export class RepositorioPrismaAutenticacao implements RepositorioAutenticacao {
       return null;
     }
 
+    const papeis = usuario.roles.map((vinculo) => vinculo.role.key);
+
     return {
       id: usuario.id,
       idSalao: usuario.tenantId,
       nomeCompleto: usuario.fullName,
       email: usuario.email,
       hashSenha: usuario.passwordHash,
-      papelPrincipal: usuario.roles[0]?.role.key ?? "RECEPCAO"
+      papelPrincipal: escolherPapelPrincipal(papeis)
     };
   }
 }

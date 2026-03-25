@@ -39,6 +39,13 @@ const montarPeriodo = (inicioDe?: Date, inicioAte?: Date): Prisma.DateTimeFilter
 export class RepositorioPrismaAgendamento implements RepositorioAgendamento {
   async criar(dados: Omit<EntidadeAgendamento, "id">): Promise<EntidadeAgendamento> {
     return prisma.$transaction(async (trx) => {
+      await this.validarRelacionamentosAgendamento(
+        trx,
+        dados.idSalao,
+        dados.idCliente,
+        dados.idProfissional
+      );
+
       const itens = await this.resolverItensAgendamento(
         trx,
         dados.idSalao,
@@ -317,6 +324,39 @@ export class RepositorioPrismaAgendamento implements RepositorioAgendamento {
       })),
       servicosMaisVendidos
     };
+  }
+
+  private async validarRelacionamentosAgendamento(
+    trx: Prisma.TransactionClient,
+    idSalao: string,
+    idCliente: string,
+    idProfissional: string
+  ): Promise<void> {
+    const [cliente, profissional] = await Promise.all([
+      trx.client.findFirst({
+        where: {
+          id: idCliente,
+          tenantId: idSalao
+        },
+        select: { id: true }
+      }),
+      trx.professional.findFirst({
+        where: {
+          id: idProfissional,
+          tenantId: idSalao,
+          isActive: true
+        },
+        select: { id: true }
+      })
+    ]);
+
+    if (!cliente) {
+      throw new Error("Cliente informado nao pertence ao salao.");
+    }
+
+    if (!profissional) {
+      throw new Error("Profissional informado nao pertence ao salao ou esta inativo.");
+    }
   }
 
   private async resolverItensAgendamento(

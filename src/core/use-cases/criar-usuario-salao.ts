@@ -9,6 +9,7 @@ interface EntradaCriarUsuarioSalao {
   nomeCompleto: string;
   email: string;
   senha: string;
+  papel?: string;
 }
 
 export class CasoDeUsoCriarUsuarioSalao {
@@ -23,7 +24,8 @@ export class CasoDeUsoCriarUsuarioSalao {
       idSalao: entrada.idSalao,
       nomeCompleto: entrada.nomeCompleto,
       email: entrada.email,
-      hashSenha: gerarHashSenha(entrada.senha)
+      hashSenha: gerarHashSenha(entrada.senha),
+      papel: entrada.papel ?? "RECEPCAO"
     });
   }
 }

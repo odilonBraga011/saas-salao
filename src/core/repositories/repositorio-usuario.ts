@@ -3,6 +3,7 @@ export interface EntidadeUsuarioInterno {
   idSalao: string;
   nomeCompleto: string;
   email: string;
+  papel: string;
   status: "ATIVO" | "INATIVO" | "BLOQUEADO";
 }
 
@@ -13,5 +14,6 @@ export interface RepositorioUsuario {
     nomeCompleto: string;
     email: string;
     hashSenha: string;
+    papel?: string;
   }): Promise<EntidadeUsuarioInterno>;
 }

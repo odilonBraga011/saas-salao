@@ -83,12 +83,12 @@
     {
       "channel": "WHATSAPP",
       "webhookUrl": "https://definir-webhook",
-      "isActive": false
+      "isActive": true
     },
     {
       "channel": "INSTAGRAM",
       "webhookUrl": "https://definir-webhook",
-      "isActive": false
+      "isActive": true
     }
   ]
 }

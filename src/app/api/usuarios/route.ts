@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
 import { CasoDeUsoCriarUsuarioSalao } from "@/core/use-cases/criar-usuario-salao";
@@ -15,7 +16,7 @@ export async function GET(request: NextRequest) {
   const papel = obterPapel(request);
 
   if (!canAccess(papel, "usuarios.gerenciar")) {
-    return NextResponse.json({ erro: "Acesso negado para listar usuários." }, { status: 403 });
+    return NextResponse.json({ erro: "Acesso negado para listar usuarios." }, { status: 403 });
   }
 
   const parametros = Object.fromEntries(request.nextUrl.searchParams.entries());
@@ -23,7 +24,7 @@ export async function GET(request: NextRequest) {
 
   if (!validacao.success) {
     return NextResponse.json(
-      { erro: "Parâmetros inválidos.", detalhes: validacao.error.flatten() },
+      { erro: "Parametros invalidos.", detalhes: validacao.error.flatten() },
       { status: 400 }
     );
   }
@@ -38,14 +39,14 @@ export async function POST(request: NextRequest) {
   const papel = obterPapel(request);
 
   if (!canAccess(papel, "usuarios.gerenciar")) {
-    return NextResponse.json({ erro: "Acesso negado para criar usuários." }, { status: 403 });
+    return NextResponse.json({ erro: "Acesso negado para criar usuarios." }, { status: 403 });
   }
 
   const validacao = criarUsuarioSchema.safeParse(await request.json());
 
   if (!validacao.success) {
     return NextResponse.json(
-      { erro: "Dados inválidos.", detalhes: validacao.error.flatten() },
+      { erro: "Dados invalidos.", detalhes: validacao.error.flatten() },
       { status: 400 }
     );
   }
@@ -56,7 +57,14 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ dados: usuario }, { status: 201 });
   } catch (erro) {
-    const mensagem = erro instanceof Error ? erro.message : "Erro ao criar usuário.";
+    if (erro instanceof Prisma.PrismaClientKnownRequestError && erro.code === "P2002") {
+      return NextResponse.json(
+        { erro: "Ja existe usuario com este email no salao informado." },
+        { status: 409 }
+      );
+    }
+
+    const mensagem = erro instanceof Error ? erro.message : "Erro ao criar usuario.";
     return NextResponse.json({ erro: mensagem }, { status: 422 });
   }
 }
